@@ -45,13 +45,13 @@
 			"response": []
 		},
 		{
-			"name": "create user",
+			"name": "register",
 			"request": {
 				"method": "POST",
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"name\":\"mock\",\r\n    \"username\":\"mock user\"\r\n}",
+					"raw": "{\r\n    \"name\":\"mock\",\r\n    \"username\":\"mock user\",\r\n    \"email\":\"shixiong@gmail.com\",\r\n    \"password\":\"123\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -116,6 +116,35 @@
 					"path": [
 						"user",
 						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "login",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \r\n    \"email\":\"shixiong@gmail.com\",\r\n    \"password\":\"123\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/user/login",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"user",
+						"login"
 					]
 				}
 			},

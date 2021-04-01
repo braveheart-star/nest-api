@@ -11,7 +11,7 @@ import { UserService } from "./user.service";
 import { Observable, of } from "rxjs";
 import { catchError, map } from "rxjs/operators";
 
-import { User } from "./models/user.interface";
+import { User } from "./user.interface";
 
 @Controller("user")
 export class UserController {
@@ -25,6 +25,14 @@ export class UserController {
     );
   }
 
+  @Post("login")
+  login(@Body() user: User): Observable<any> {
+    return this.userService.login(user).pipe(
+      map((jwt: string) => {
+        return { access_token: jwt };
+      }),
+    );
+  }
   @Get(":id")
   findOne(@Param() param): Observable<User> {
     return this.userService.findOne(param.id);
