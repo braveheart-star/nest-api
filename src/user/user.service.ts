@@ -1,14 +1,11 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
+import { from, Observable, throwError } from "rxjs";
+import { switchMap, catchError, map } from "rxjs/operators";
+import { AuthService } from "../auth/auth.service";
 import { UserEntity } from "./user.entity";
 import { User } from "./user.interface";
-import { from, Observable, throwError } from "rxjs";
-import { AuthService } from "../auth/auth.service";
-import { switchMap, catchError, map } from "rxjs/operators";
-import * as request from "supertest";
-import e from "express";
-
 @Injectable()
 export class UserService {
   constructor(
@@ -29,6 +26,7 @@ export class UserService {
         return from(this.userRepository.save(newUser)).pipe(
           map((user: User) => {
             // extract password from return value
+            // eslint-disable-next-line
             const { password, ...result } = user;
             return result;
           }),
@@ -41,6 +39,7 @@ export class UserService {
   findOne(id: number): Observable<User> {
     return from(this.userRepository.findOne({ id })).pipe(
       map((user: User) => {
+        // eslint-disable-next-line
         const { password, ...result } = user;
         return result;
       }),
@@ -88,6 +87,7 @@ export class UserService {
         this.authService.comparePassword(password, user.password).pipe(
           map((match: boolean) => {
             if (match) {
+              // eslint-disable-next-line
               const { password, ...result } = user;
               return result;
             } else throw Error;
