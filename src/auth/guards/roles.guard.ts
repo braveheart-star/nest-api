@@ -27,10 +27,7 @@ export class RolesGuard implements CanActivate {
     }
     const request = context.switchToHttp().getRequest();
     const user: User = request.user.user;
-    console.log(
-      "🚀 ~ file: roles.guard.ts ~ line 28 ~ RolesGuard ~ user",
-      user,
-    );
+
     return this.userService.findOne(user.id).pipe(
       map((user: User) => {
         // check if user's role exists in the roles

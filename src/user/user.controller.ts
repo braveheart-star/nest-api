@@ -8,10 +8,11 @@ import {
   Put,
   UseGuards,
 } from "@nestjs/common";
-import { UserService } from "./user.service";
+
 import { Observable, of } from "rxjs";
 import { catchError, map } from "rxjs/operators";
 
+import { UserService } from "./user.service";
 import { User, UserRole } from "./user.interface";
 import { hasRoles } from "../auth/decorator/roles.decorator";
 import { JwtAuthGuard } from "../auth/guards/jwt-guard";
