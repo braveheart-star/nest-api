@@ -6,8 +6,10 @@ import {
   forwardRef,
 } from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
-import { UserService } from "../../user/user.service";
 import { Observable } from "rxjs";
+import { map } from "rxjs/operators";
+import { User } from "../../user/user.interface";
+import { UserService } from "../../user/user.service";
 
 @Injectable()
 export class RolesGuard implements CanActivate {
@@ -24,11 +26,22 @@ export class RolesGuard implements CanActivate {
       return true;
     }
     const request = context.switchToHttp().getRequest();
+    const user: User = request.user.user;
     console.log(
-      "🚀 ~ file: roles.guard.ts ~ line 17 ~ RolesGuard ~ request",
-      request,
+      "🚀 ~ file: roles.guard.ts ~ line 28 ~ RolesGuard ~ user",
+      user,
     );
-    const user = request.user;
-    return true;
+    return this.userService.findOne(user.id).pipe(
+      map((user: User) => {
+        // check if user's role exists in the roles
+        const hasRole = () => roles.indexOf(user.role) > -1;
+        let hasPermission = false;
+
+        if (hasRole()) {
+          hasPermission = true;
+        }
+        return user && hasPermission;
+      }),
+    );
   }
 }

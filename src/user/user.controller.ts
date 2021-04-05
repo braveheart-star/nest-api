@@ -12,7 +12,7 @@ import { UserService } from "./user.service";
 import { Observable, of } from "rxjs";
 import { catchError, map } from "rxjs/operators";
 
-import { User } from "./user.interface";
+import { User, UserRole } from "./user.interface";
 import { hasRoles } from "../auth/decorator/roles.decorator";
 import { JwtAuthGuard } from "../auth/guards/jwt-guard";
 import { RolesGuard } from "../auth/guards/roles.guard";
@@ -38,8 +38,6 @@ export class UserController {
     );
   }
 
-  @hasRoles("Admin")
-  @UseGuards(JwtAuthGuard, RolesGuard)
   @Get()
   findAll(): Observable<User[]> {
     return this.userService.findAll();
@@ -58,5 +56,15 @@ export class UserController {
   @Put(":id")
   updateOne(@Param("id") id: string, @Body() user: User): Observable<any> {
     return this.userService.updateOne(Number(id), user);
+  }
+
+  @hasRoles(UserRole.ADMIN)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Put(":id/role")
+  updateRoleOfUser(
+    @Param("id") id: string,
+    @Body() user: User,
+  ): Observable<User> {
+    return this.userService.updateRoleOfUser(Number(id), user);
   }
 }
