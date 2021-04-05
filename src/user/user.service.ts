@@ -1,13 +1,19 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
+import {
+  paginate,
+  Pagination,
+  IPaginationOptions,
+} from "nestjs-typeorm-paginate";
 
 import { from, Observable, throwError } from "rxjs";
 import { switchMap, catchError, map } from "rxjs/operators";
 
 import { AuthService } from "../auth/auth.service";
 import { UserEntity } from "./user.entity";
-import { User } from "./user.interface";
+import { User, UserRole } from "./user.interface";
+
 @Injectable()
 export class UserService {
   constructor(
@@ -24,7 +30,7 @@ export class UserService {
         newUser.username = user.username;
         newUser.email = user.email;
         newUser.password = passwordHash;
-        newUser.role = user.role;
+        newUser.role = UserRole.USER;
 
         return from(this.userRepository.save(newUser)).pipe(
           map((user: User) => {
@@ -60,6 +66,16 @@ export class UserService {
       }),
     );
   }
+  paginate(options: IPaginationOptions): Observable<Pagination<User>> {
+    return from(paginate<User>(this.userRepository, options)).pipe(
+      map((paginatedUsers: Pagination<User>) => {
+        paginatedUsers.items.forEach(function (v) {
+          delete v.password;
+        });
+        return paginatedUsers;
+      }),
+    );
+  }
 
   deleteOne(id: number): Observable<any> {
     return from(this.userRepository.delete(id));
@@ -69,6 +85,7 @@ export class UserService {
     // make user not change password or email directly using api, they should have link or whatever for changing their email & password
     delete user.email;
     delete user.password;
+    delete user.role;
 
     return from(this.userRepository.update(id, user));
   }
