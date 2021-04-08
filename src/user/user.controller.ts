@@ -10,10 +10,12 @@ import {
   UseGuards,
   UploadedFile,
   UseInterceptors,
+  Request,
+  Res,
 } from "@nestjs/common";
 
 import { Observable, of } from "rxjs";
-import { catchError, map } from "rxjs/operators";
+import { catchError, map, tap } from "rxjs/operators";
 
 import { UserService } from "./user.service";
 import { User, UserRole } from "./user.interface";
@@ -24,6 +26,8 @@ import { Pagination } from "nestjs-typeorm-paginate";
 import { FileInterceptor } from "@nestjs/platform-express";
 
 import path = require("path");
+import { join } from "path";
+
 import { diskStorage } from "multer";
 import { v4 as uuidv4 } from "uuid";
 
@@ -119,13 +123,27 @@ export class UserController {
     return this.userService.updateRoleOfUser(Number(id), user);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Post("upload")
   @UseInterceptors(FileInterceptor("file", storage))
-  uploadFile(@UploadedFile() file): Observable<any> {
-    console.log(
-      "🚀 ~ file: user.controller.ts ~ line 123 ~ UserController ~ uploadFile ~ file",
-      file,
+  uploadFile(@UploadedFile() file, @Request() req): Observable<any> {
+    const user: User = req.user.user;
+    console.log("file, user", file, user);
+
+    return this.userService
+      .updateOne(user.id, { profileImage: file.filename })
+      .pipe(
+        tap((user: User) => console.log("user ==>", user)),
+        map((user: User) => ({ profileImage: user.profileImage })),
+      );
+
+    // return of({ imagePath: file.filename });
+  }
+
+  @Get("profile-image/:imageName")
+  findProfileImage(@Param("imageName") imageName, @Res() res): Observable<any> {
+    return of(
+      res.sendFile(join(process.cwd(), `uploads/profileImages/${imageName}`)),
     );
-    return of({ imagePath: file.filename });
   }
 }
