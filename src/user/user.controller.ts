@@ -8,6 +8,8 @@ import {
   Put,
   Query,
   UseGuards,
+  UploadedFile,
+  UseInterceptors,
 } from "@nestjs/common";
 
 import { Observable, of } from "rxjs";
@@ -19,6 +21,26 @@ import { hasRoles } from "../auth/decorator/roles.decorator";
 import { JwtAuthGuard } from "../auth/guards/jwt-guard";
 import { RolesGuard } from "../auth/guards/roles.guard";
 import { Pagination } from "nestjs-typeorm-paginate";
+import { FileInterceptor } from "@nestjs/platform-express";
+
+import path = require("path");
+import { diskStorage } from "multer";
+import { v4 as uuidv4 } from "uuid";
+
+const storage = {
+  storage: diskStorage({
+    destination: "./uploads/profileImages",
+    filename: (req, file, cb) => {
+      const filename: string =
+        // use regular express to remove whitespace
+        path.parse(file.originalname).name.replace(/\s/g, "") + uuidv4();
+
+      const extension: string = path.parse(file.originalname).ext;
+      // call back
+      cb(null, `${filename}${extension}`);
+    },
+  }),
+};
 
 @Controller("user")
 export class UserController {
@@ -95,5 +117,15 @@ export class UserController {
     @Body() user: User,
   ): Observable<User> {
     return this.userService.updateRoleOfUser(Number(id), user);
+  }
+
+  @Post("upload")
+  @UseInterceptors(FileInterceptor("file", storage))
+  uploadFile(@UploadedFile() file): Observable<any> {
+    console.log(
+      "🚀 ~ file: user.controller.ts ~ line 123 ~ UserController ~ uploadFile ~ file",
+      file,
+    );
+    return of({ imagePath: file.filename });
   }
 }
