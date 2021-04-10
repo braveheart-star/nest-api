@@ -30,6 +30,7 @@ import { join } from "path";
 
 import { diskStorage } from "multer";
 import { v4 as uuidv4 } from "uuid";
+import { UserIsUserGuard } from "./UserIsUser.guard";
 
 const storage = {
   storage: diskStorage({
@@ -108,6 +109,8 @@ export class UserController {
     return this.userService.deleteOne(Number(id));
   }
 
+  // user can only update his profile
+  @UseGuards(JwtAuthGuard, UserIsUserGuard)
   @Put(":id")
   updateOne(@Param("id") id: string, @Body() user: User): Observable<any> {
     return this.userService.updateOne(Number(id), user);
