@@ -9,13 +9,20 @@ import {
   Param,
   Put,
   Delete,
+  UseInterceptors,
+  UploadedFile,
+  Res,
 } from "@nestjs/common";
-import { Observable } from "rxjs";
+import { Observable, of } from "rxjs";
+import { FileInterceptor } from "@nestjs/platform-express";
+import { join } from "path";
 
 import { BlogService } from "./blog.service";
 import { BlogEntry } from "./blog-entry.interface";
 import { JwtAuthGuard } from "../auth/guards/jwt-guard";
 import { UserIsAuthorGuard } from "./guards/user-is-author.guard";
+import { storage } from "../user/user.controller";
+import { BlogImage } from "./image.interface";
 
 export const BLOG_URL = "http://localhost:3000/api/blog";
 
@@ -84,5 +91,19 @@ export class BlogController {
   @Delete(":id")
   deleteOne(@Param("id") id: number): Observable<any> {
     return this.blogService.deleteOne(id);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post("image/upload")
+  @UseInterceptors(FileInterceptor("file", storage))
+  uploadFile(@UploadedFile() file): Observable<BlogImage> {
+    return of(file);
+  }
+
+  @Get("image/:imageName")
+  findBlogImage(@Param("imageName") imageName, @Res() res): Observable<any> {
+    return of(
+      res.sendFile(join(process.cwd(), `uploads/profileImages/${imageName}`)),
+    );
   }
 }

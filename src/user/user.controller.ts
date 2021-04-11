@@ -32,7 +32,7 @@ import { diskStorage } from "multer";
 import { v4 as uuidv4 } from "uuid";
 import { UserIsUserGuard } from "./UserIsUser.guard";
 
-const storage = {
+export const storage = {
   storage: diskStorage({
     destination: "./uploads/profileImages",
     filename: (req, file, cb) => {
@@ -133,7 +133,6 @@ export class UserController {
   @UseInterceptors(FileInterceptor("file", storage))
   uploadFile(@UploadedFile() file, @Request() req): Observable<any> {
     const user: User = req.user;
-    console.log("file, user", file, user);
 
     return this.userService
       .updateOne(user.id, { profileImage: file.filename })
@@ -141,8 +140,6 @@ export class UserController {
         tap((user: User) => console.log("user ==>", user)),
         map((user: User) => ({ profileImage: user.profileImage })),
       );
-
-    // return of({ imagePath: file.filename });
   }
 
   @Get("profile-image/:imageName")
