@@ -2,21 +2,26 @@ import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 
+import {
+  IPaginationOptions,
+  paginate,
+  Pagination,
+} from "nestjs-typeorm-paginate";
+
 import slugify from "slugify";
+
 import { from, Observable, of } from "rxjs";
 import { map, switchMap } from "rxjs/operators";
 
 import { BlogEntry } from "./blog-entry.interface";
 import { BlogEntryEntity } from "./blog-entry.entity";
 import { User } from "../user/user.interface";
-import { UserService } from "../user/user.service";
 
 @Injectable()
 export class BlogService {
   constructor(
     @InjectRepository(BlogEntryEntity)
     private readonly blogRepository: Repository<BlogEntryEntity>,
-    private userService: UserService,
   ) {}
   create(user: User, blogEntry: BlogEntry): Observable<BlogEntry> {
     blogEntry.author = user;
@@ -34,6 +39,26 @@ export class BlogService {
         relations: ["author"],
       }),
     );
+  }
+
+  paginateALl(options: IPaginationOptions): Observable<Pagination<BlogEntry>> {
+    return from(
+      paginate<BlogEntry>(this.blogRepository, options, {
+        relations: ["author"],
+      }),
+    ).pipe(map((blogEntries: Pagination<BlogEntry>) => blogEntries));
+  }
+
+  paginateByUser(
+    options: IPaginationOptions,
+    userId: number,
+  ): Observable<Pagination<BlogEntry>> {
+    return from(
+      paginate<BlogEntry>(this.blogRepository, options, {
+        relations: ["author"],
+        where: [{ author: userId }],
+      }),
+    ).pipe(map((blogEntries: Pagination<BlogEntry>) => blogEntries));
   }
 
   findOne(id: number): Observable<BlogEntry> {
