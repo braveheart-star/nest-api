@@ -15,9 +15,11 @@ import { UserService } from "../../user/user.service";
 export class RolesGuard implements CanActivate {
   constructor(
     private reflector: Reflector,
+
     @Inject(forwardRef(() => UserService))
     private userService: UserService,
   ) {}
+
   canActivate(
     context: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {
@@ -25,8 +27,9 @@ export class RolesGuard implements CanActivate {
     if (!roles) {
       return true;
     }
+
     const request = context.switchToHttp().getRequest();
-    const user: User = request.user.user;
+    const user: User = request.user;
 
     return this.userService.findOne(user.id).pipe(
       map((user: User) => {

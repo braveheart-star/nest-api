@@ -21,11 +21,7 @@ export class UserIsUserGuard implements CanActivate {
   ): boolean | Promise<boolean> | Observable<boolean> {
     const request = context.switchToHttp().getRequest();
     const params = request.params;
-    const user: User = request.user.user;
-    console.log(
-      "🚀 ~ file: UserIsUser.guard.ts ~ line 22 ~ UserIsUserGuard ~ params",
-      params,
-    );
+    const user: User = request.user;
 
     return this.userService.findOne(user.id).pipe(
       map((user: User) => {
