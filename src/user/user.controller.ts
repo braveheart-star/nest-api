@@ -16,6 +16,7 @@ import {
 
 import { Observable, of } from "rxjs";
 import { catchError, map, tap } from "rxjs/operators";
+import { FileInterceptor } from "@nestjs/platform-express";
 
 import { UserService } from "./user.service";
 import { User, UserRole } from "./user.interface";
@@ -23,7 +24,6 @@ import { hasRoles } from "../auth/decorator/roles.decorator";
 import { JwtAuthGuard } from "../auth/guards/jwt-guard";
 import { RolesGuard } from "../auth/guards/roles.guard";
 import { Pagination } from "nestjs-typeorm-paginate";
-import { FileInterceptor } from "@nestjs/platform-express";
 
 import path = require("path");
 import { join } from "path";
@@ -104,6 +104,8 @@ export class UserController {
     return this.userService.findOne(param.id);
   }
 
+  @hasRoles(UserRole.ADMIN)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Delete(":id")
   deleteOne(@Param("id") id: string): Observable<User> {
     return this.userService.deleteOne(Number(id));
@@ -130,7 +132,7 @@ export class UserController {
   @Post("upload")
   @UseInterceptors(FileInterceptor("file", storage))
   uploadFile(@UploadedFile() file, @Request() req): Observable<any> {
-    const user: User = req.user.user;
+    const user: User = req.user;
     console.log("file, user", file, user);
 
     return this.userService
