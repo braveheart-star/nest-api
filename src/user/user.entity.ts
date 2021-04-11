@@ -22,7 +22,8 @@ export class UserEntity {
   @Column()
   email: string;
 
-  @Column()
+  // by adding select, password won't appear in relational mappings
+  @Column({ select: false })
   password: string;
 
   @Column({ type: "enum", enum: UserRole, default: UserRole.USER })
